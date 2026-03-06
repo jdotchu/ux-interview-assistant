@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Second Brain — UX Interview Assistant</title>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&family=Bricolage+Grotesque:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ink: #0f0e0c;
+    --paper: #f5f2eb;
+    --paper-dark: #ede9df;
+    --accent: #c84b2f;
+    --accent-soft: #f0d5ce;
+    --teal: #1a6b5e;
+    --teal-soft: #c8e0dc;
+    --amber: #b87d1a;
+    --amber-soft: #f5e8c8;
+    --muted: #7a7569;
+    --border: #d8d3c8;
+    --card: #faf8f3;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Bricolage Grotesque', sans-serif;
+    background: var(--paper);
+    color: var(--ink);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── Header ── */
+  header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 28px;
+    border-bottom: 1.5px solid var(--border);
+    background: var(--paper);
+    position: sticky; top: 0; z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    letter-spacing: -0.3px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .logo-dot {
+    width: 10px; height: 10px;
+    background: var(--accent);
+    border-radius: 50%;
+    display: inline-block;
+  }
+
+  .header-status {
+    display: flex; align-items: center; gap: 16px;
+  }
+
+  .status-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+    background: var(--card);
+    display: flex; align-items: center; gap: 6px;
+  }
+  .status-pill.recording {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-soft);
+  }
+  .status-pill .pulse {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 1.4s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(0.7); }
+  }
+
+  /* ── Setup Screen ── */
+  #setup-screen {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+    gap: 32px;
+  }
+
+  .setup-header {
+    text-align: center;
+    max-width: 540px;
+  }
+  .setup-header h1 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 42px;
+    line-height: 1.1;
+    font-weight: 400;
+    letter-spacing: -0.5px;
+    margin-bottom: 12px;
+  }
+  .setup-header h1 em {
+    font-style: italic;
+    color: var(--accent);
+  }
+  .setup-header p {
+    color: var(--muted);
+    font-size: 15px;
+    line-height: 1.6;
+    font-weight: 300;
+  }
+
+  .setup-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    padding: 28px;
+    width: 100%;
+    max-width: 640px;
+  }
+
+  .setup-card label {
+    display: block;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .setup-card input[type="text"],
+  .setup-card input[type="password"] {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    background: var(--paper);
+    color: var(--ink);
+    outline: none;
+    transition: border-color 0.15s;
+  }
+  .setup-card input:focus { border-color: var(--ink); }
+
+  .setup-card textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    background: var(--paper);
+    color: var(--ink);
+    outline: none;
+    resize: vertical;
+    min-height: 160px;
+    line-height: 1.6;
+    transition: border-color 0.15s;
+  }
+  .setup-card textarea:focus { border-color: var(--ink); }
+  .setup-card textarea::placeholder { color: var(--muted); }
+
+  .setup-row { display: flex; flex-direction: column; gap: 14px; }
+  .setup-divider { height: 1px; background: var(--border); margin: 4px 0; }
+
+  .api-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+
+  .hint {
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 5px;
+    font-weight: 300;
+  }
+  .hint a { color: var(--teal); text-decoration: none; }
+  .hint a:hover { text-decoration: underline; }
+
+  .btn-primary {
+    width: 100%;
+    max-width: 640px;
+    padding: 14px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 10px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.1s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  .btn-primary:hover { background: #2a2824; }
+  .btn-primary:active { transform: scale(0.99); }
+  .btn-primary:disabled { background: var(--border); color: var(--muted); cursor: not-allowed; }
+
+  /* ── Interview Screen ── */
+  #interview-screen {
+    flex: 1;
+    display: none;
+    grid-template-columns: 1fr 380px;
+    grid-template-rows: 1fr auto;
+    height: calc(100vh - 57px);
+    overflow: hidden;
+  }
+
+  /* Left — Transcript */
+  .transcript-panel {
+    border-right: 1.5px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .panel-header {
+    padding: 16px 22px;
+    border-bottom: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .panel-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .panel-title span { color: var(--ink); }
+
+  .transcript-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    scroll-behavior: smooth;
+  }
+
+  .transcript-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    gap: 12px;
+    color: var(--muted);
+    text-align: center;
+  }
+  .transcript-empty .empty-icon {
+    font-size: 36px;
+    opacity: 0.4;
+  }
+  .transcript-empty p {
+    font-size: 14px;
+    font-weight: 300;
+    max-width: 260px;
+    line-height: 1.5;
+  }
+
+  .transcript-line {
+    display: flex;
+    gap: 12px;
+    animation: fadeSlideIn 0.3s ease-out;
+  }
+  @keyframes fadeSlideIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .speaker-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    font-weight: 500;
+    padding: 3px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    align-self: flex-start;
+    margin-top: 2px;
+  }
+  .speaker-tag.you {
+    background: var(--ink);
+    color: var(--paper);
+  }
+  .speaker-tag.participant {
+    background: var(--teal-soft);
+    color: var(--teal);
+  }
+
+  .transcript-text {
+    font-size: 14px;
+    line-height: 1.65;
+    font-weight: 300;
+    flex: 1;
+  }
+
+  .transcript-interim {
+    font-size: 14px;
+    line-height: 1.65;
+    font-weight: 300;
+    color: var(--muted);
+    font-style: italic;
+    flex: 1;
+    padding-left: 60px;
+  }
+
+  /* Right — Insights */
+  .insights-panel {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--card);
+  }
+
+  .insights-body {
+    flex: 1;
+    overflow-y: auto;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .insight-card {
+    background: var(--paper);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 14px;
+    animation: cardSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  @keyframes cardSlideIn {
+    from { opacity: 0; transform: translateX(12px); }
+    to { opacity: 1; transform: translateX(0); }
+  }
+
+  .insight-card.probe { border-left: 3px solid var(--teal); }
+  .insight-card.missed { border-left: 3px solid var(--accent); }
+  .insight-card.sentiment { border-left: 3px solid var(--amber); }
+
+  .insight-type {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .insight-card.probe .insight-type { color: var(--teal); }
+  .insight-card.missed .insight-type { color: var(--accent); }
+  .insight-card.sentiment .insight-type { color: var(--amber); }
+
+  .insight-text {
+    font-size: 13px;
+    line-height: 1.55;
+    font-weight: 300;
+    color: var(--ink);
+  }
+
+  .insight-time {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  .insights-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    gap: 8px;
+    color: var(--muted);
+    text-align: center;
+    padding: 20px;
+  }
+  .insights-empty p { font-size: 13px; font-weight: 300; line-height: 1.5; }
+
+  .timer-bar {
+    padding: 10px 16px;
+    border-top: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--paper);
+  }
+
+  .timer-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    flex: 1;
+  }
+
+  .timer-track {
+    flex: 1;
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .timer-fill {
+    height: 100%;
+    background: var(--teal);
+    border-radius: 2px;
+    transition: width 1s linear;
+  }
+
+  /* Bottom bar */
+  .bottom-bar {
+    grid-column: 1 / -1;
+    padding: 14px 22px;
+    border-top: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: var(--paper);
+  }
+
+  .btn-record {
+    padding: 10px 22px;
+    background: var(--accent);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 7px;
+    transition: background 0.15s;
+  }
+  .btn-record:hover { background: #a83a20; }
+  .btn-record.stop { background: var(--ink); }
+  .btn-record.stop:hover { background: #2a2824; }
+
+  .btn-summary {
+    padding: 10px 18px;
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    cursor: pointer;
+    display: flex; align-items: center; gap: 7px;
+    transition: all 0.15s;
+  }
+  .btn-summary:hover { border-color: var(--ink); }
+  .btn-summary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .session-timer {
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    color: var(--muted);
+    margin-left: auto;
+  }
+
+  /* Summary Modal */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(15,14,12,0.6);
+    backdrop-filter: blur(4px);
+    z-index: 200;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+  }
+  .modal-overlay.open { display: flex; }
+
+  .modal {
+    background: var(--paper);
+    border: 1.5px solid var(--border);
+    border-radius: 16px;
+    width: 100%;
+    max-width: 680px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .modal-header {
+    padding: 20px 24px;
+    border-bottom: 1.5px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .modal-header h2 {
+    font-family: 'Instrument Serif', serif;
+    font-size: 22px;
+    font-weight: 400;
+  }
+  .modal-close {
+    background: none; border: none; cursor: pointer;
+    color: var(--muted); font-size: 20px; line-height: 1;
+    padding: 4px;
+  }
+  .modal-close:hover { color: var(--ink); }
+
+  .modal-body {
+    padding: 22px 24px;
+    overflow-y: auto;
+    flex: 1;
+    font-size: 14px;
+    line-height: 1.7;
+    font-weight: 300;
+    white-space: pre-wrap;
+  }
+
+  .modal-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 40px;
+    color: var(--muted);
+    font-size: 14px;
+  }
+
+  .spinner {
+    width: 20px; height: 20px;
+    border: 2px solid var(--border);
+    border-top-color: var(--ink);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .modal-footer {
+    padding: 16px 24px;
+    border-top: 1.5px solid var(--border);
+    display: flex; gap: 10px; justify-content: flex-end;
+  }
+
+  .btn-copy {
+    padding: 9px 18px;
+    background: var(--ink);
+    color: var(--paper);
+    border: none;
+    border-radius: 8px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .btn-copy:hover { background: #2a2824; }
+
+  .btn-close-modal {
+    padding: 9px 18px;
+    background: transparent;
+    color: var(--ink);
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    font-family: 'Bricolage Grotesque', sans-serif;
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  /* Topics tracker */
+  .topics-section {
+    padding: 14px 16px;
+    border-bottom: 1.5px solid var(--border);
+  }
+  .topics-title {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+  .topic-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+  .topic-chip {
+    font-size: 11px;
+    padding: 3px 9px;
+    border-radius: 20px;
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+    background: var(--paper);
+    transition: all 0.2s;
+    font-weight: 400;
+  }
+  .topic-chip.covered {
+    border-color: var(--teal);
+    color: var(--teal);
+    background: var(--teal-soft);
+    text-decoration: line-through;
+    opacity: 0.6;
+  }
+
+  /* Error */
+  .error-banner {
+    background: var(--accent-soft);
+    border: 1.5px solid var(--accent);
+    color: var(--accent);
+    padding: 10px 14px;
+    border-radius: 8px;
+    font-size: 13px;
+    margin: 0 16px 10px;
+  }
+
+  /* Scrollbar */
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @media (max-width: 768px) {
+    #interview-screen { grid-template-columns: 1fr; grid-template-rows: 1fr 320px auto; }
+    .insights-panel { border-top: 1.5px solid var(--border); }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">
+    <span class="logo-dot"></span>
+    Second Brain
+  </div>
+  <div class="header-status">
+    <div class="status-pill" id="status-pill">● Idle</div>
+  </div>
+</header>
+
+<!-- Setup Screen -->
+<div id="setup-screen">
+  <div class="setup-header">
+    <h1>Your <em>live</em> interview<br>co-researcher.</h1>
+    <p>Paste your discussion guide and API keys below. Second Brain will listen, transcribe, and surface real-time coaching nudges so you never miss a follow-up.</p>
+  </div>
+
+  <div class="setup-card">
+    <div class="setup-row">
+      <div class="api-row">
+        <div>
+          <label>Deepgram API Key</label>
+          <input type="password" id="deepgram-key" placeholder="e.g. abc123..." />
+          <p class="hint">Get a free key at <a href="https://console.deepgram.com" target="_blank">console.deepgram.com</a></p>
+        </div>
+        <div>
+          <label>Anthropic API Key</label>
+          <input type="password" id="anthropic-key" placeholder="sk-ant-..." />
+          <p class="hint">Get a key at <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a></p>
+        </div>
+      </div>
+
+      <div class="setup-divider"></div>
+
+      <div>
+        <label>Discussion Guide</label>
+        <textarea id="discussion-guide" placeholder="Paste your interview questions or topics here. For example:
+
+1. Walk me through a typical day using the product
+2. What's the most frustrating part of your current workflow?
+3. Tell me about a time when the product failed you
+4. How do you work around problems you encounter?
+5. What would make this 10x better for you?"></textarea>
+        <p class="hint">The more detail you provide, the better the coaching suggestions will be.</p>
+      </div>
+
+      <div>
+        <label>Participant Name (optional)</label>
+        <input type="text" id="participant-name" placeholder="e.g. Sarah, P3, Participant..." />
+      </div>
+    </div>
+  </div>
+
+  <button class="btn-primary" id="start-btn" onclick="startInterview()">
+    <span>▶</span> Begin Interview Session
+  </button>
+</div>
+
+<!-- Interview Screen -->
+<div id="interview-screen">
+  <!-- Left: Transcript -->
+  <div class="transcript-panel">
+    <div class="panel-header">
+      <div class="panel-title">Live Transcript <span id="word-count"></span></div>
+      <div style="font-family:'DM Mono',monospace;font-size:11px;color:var(--muted)" id="next-analysis">Analysis in 20s</div>
+    </div>
+    <div class="transcript-body" id="transcript-body">
+      <div class="transcript-empty" id="transcript-empty">
+        <div class="empty-icon">🎙</div>
+        <p>Waiting for speech… Make sure your audio is routed through BlackHole.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Right: Insights -->
+  <div class="insights-panel">
+    <div class="panel-header">
+      <div class="panel-title">Coaching Nudges</div>
+    </div>
+
+    <!-- Topics tracker -->
+    <div class="topics-section">
+      <div class="topics-title">Discussion Guide Topics</div>
+      <div class="topic-chips" id="topic-chips">
+        <span style="font-size:12px;color:var(--muted);font-weight:300">Topics will appear after you start.</span>
+      </div>
+    </div>
+
+    <div class="insights-body" id="insights-body">
+      <div class="insights-empty">
+        <p>Insights will appear every 20 seconds once the interview begins.</p>
+      </div>
+    </div>
+
+    <!-- Analysis timer -->
+    <div class="timer-bar">
+      <div class="timer-label" id="timer-label">Next analysis in —</div>
+      <div class="timer-track">
+        <div class="timer-fill" id="timer-fill" style="width:0%"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="bottom-bar">
+    <button class="btn-record" id="record-btn" onclick="toggleRecording()">
+      <span id="record-icon">⏺</span> <span id="record-label">Start Recording</span>
+    </button>
+    <button class="btn-summary" id="summary-btn" onclick="generateSummary()" disabled>
+      ✦ Generate Summary
+    </button>
+    <div class="session-timer" id="session-timer">00:00</div>
+  </div>
+</div>
+
+<!-- Summary Modal -->
+<div class="modal-overlay" id="summary-modal">
+  <div class="modal">
+    <div class="modal-header">
+      <h2>Interview Summary</h2>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="summary-body">
+      <div class="modal-loading">
+        <div class="spinner"></div>
+        Generating insights…
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-close-modal" onclick="closeModal()">Close</button>
+      <button class="btn-copy" onclick="copySummary()">Copy to Clipboard</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── State ──
+let deepgramKey = '';
+let anthropicKey = '';
+let discussionGuide = '';
+let participantName = 'Participant';
+let isRecording = false;
+let socket = null;
+let mediaStream = null;
+let mediaRecorder = null;
+let transcriptLines = [];
+let interimText = '';
+let analysisTimer = null;
+let analysisCountdown = 20;
+let countdownInterval = null;
+let sessionSeconds = 0;
+let sessionInterval = null;
+let topicList = [];
+let coveredTopics = new Set();
+let summaryText = '';
+
+// ── Setup ──
+function startInterview() {
+  deepgramKey = document.getElementById('deepgram-key').value.trim();
+  anthropicKey = document.getElementById('anthropic-key').value.trim();
+  discussionGuide = document.getElementById('discussion-guide').value.trim();
+  participantName = document.getElementById('participant-name').value.trim() || 'Participant';
+
+  if (!deepgramKey || !anthropicKey) {
+    alert('Please enter both API keys to continue.');
+    return;
+  }
+  if (!discussionGuide) {
+    alert('Please paste your discussion guide so Second Brain knows what to track.');
+    return;
+  }
+
+  // Parse topics from guide
+  topicList = discussionGuide.split('\n')
+    .map(l => l.replace(/^[\d\.\-\*\•]+\s*/, '').trim())
+    .filter(l => l.length > 10)
+    .slice(0, 10);
+
+  document.getElementById('setup-screen').style.display = 'none';
+  document.getElementById('interview-screen').style.display = 'grid';
+
+  renderTopics();
+}
+
+function renderTopics() {
+  const container = document.getElementById('topic-chips');
+  container.innerHTML = '';
+  topicList.forEach((t, i) => {
+    const chip = document.createElement('span');
+    chip.className = 'topic-chip' + (coveredTopics.has(i) ? ' covered' : '');
+    chip.textContent = t.length > 40 ? t.slice(0, 40) + '…' : t;
+    chip.id = 'topic-' + i;
+    container.appendChild(chip);
+  });
+}
+
+// ── Recording ──
+async function toggleRecording() {
+  if (!isRecording) {
+    await startRecording();
+  } else {
+    stopRecording();
+  }
+}
+
+function debugLog(msg, type='info') {
+  const body = document.getElementById('transcript-body');
+  document.getElementById('transcript-empty').style.display = 'none';
+  const el = document.createElement('div');
+  const colors = { info: '#1a6b5e', error: '#c84b2f', warn: '#b87d1a', success: '#1a6b5e' };
+  el.style.cssText = `font-family:'DM Mono',monospace;font-size:11px;padding:4px 8px;border-radius:4px;background:${type==='error'?'#f0d5ce':type==='warn'?'#f5e8c8':'#c8e0dc'};color:${colors[type]||'#1a6b5e'};margin:2px 0;`;
+  el.textContent = `[${new Date().toLocaleTimeString()}] ${msg}`;
+  body.appendChild(el);
+  body.scrollTop = body.scrollHeight;
+}
+
+async function startRecording() {
+  debugLog('Starting recording...', 'info');
+
+  // Step 1: Get microphone
+  try {
+    mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true, video: false });
+    const tracks = mediaStream.getAudioTracks();
+    debugLog(`✓ Microphone granted: "${tracks[0]?.label || 'unknown device'}"`, 'success');
+  } catch(e) {
+    debugLog(`✗ Microphone error: ${e.message}`, 'error');
+    alert('Could not access microphone: ' + e.message);
+    return;
+  }
+
+  // Step 2: Check Deepgram key
+  if (!deepgramKey) {
+    debugLog('✗ No Deepgram API key found!', 'error');
+    return;
+  }
+  debugLog(`✓ Deepgram key present (starts: ${deepgramKey.slice(0,8)}...)`, 'info');
+
+  // Step 3: Connect to Deepgram WebSocket
+  debugLog('Connecting to Deepgram WebSocket...', 'info');
+  const wsUrl = `wss://api.deepgram.com/v1/listen?model=nova-2&language=en&smart_format=true&interim_results=true&utterance_end_ms=1000&vad_events=true`;
+  socket = new WebSocket(wsUrl, ['token', deepgramKey]);
+
+  socket.onopen = () => {
+    debugLog('✓ Deepgram WebSocket connected!', 'success');
+
+    // Step 4: Start MediaRecorder with best supported mimeType
+    const mimeType = MediaRecorder.isTypeSupported('audio/webm;codecs=opus')
+      ? 'audio/webm;codecs=opus'
+      : MediaRecorder.isTypeSupported('audio/webm')
+      ? 'audio/webm'
+      : MediaRecorder.isTypeSupported('audio/ogg;codecs=opus')
+      ? 'audio/ogg;codecs=opus'
+      : '';
+    debugLog(`✓ Using audio format: "${mimeType || 'browser default'}"`, 'info');
+
+    try {
+      mediaRecorder = new MediaRecorder(mediaStream, mimeType ? { mimeType } : {});
+      let chunkCount = 0;
+      mediaRecorder.ondataavailable = e => {
+        if (e.data && e.data.size > 0) {
+          chunkCount++;
+          if (chunkCount <= 3) debugLog(`✓ Audio chunk #${chunkCount} sent (${e.data.size} bytes)`, 'info');
+          if (socket.readyState === WebSocket.OPEN) socket.send(e.data);
+        } else {
+          debugLog(`⚠ Empty audio chunk received`, 'warn');
+        }
+      };
+      mediaRecorder.start(250);
+      debugLog('✓ MediaRecorder started, sending audio...', 'success');
+    } catch(e) {
+      debugLog(`✗ MediaRecorder error: ${e.message}`, 'error');
+    }
+  };
+
+  socket.onmessage = (msg) => {
+    try {
+      const data = JSON.parse(msg.data);
+      if (data.type === 'Results') {
+        const alt = data.channel?.alternatives?.[0];
+        if (!alt) { debugLog('⚠ No alternatives in Results', 'warn'); return; }
+        const text = alt.transcript;
+        if (!text) return; // empty interim, normal
+        debugLog(`✓ Deepgram result: "${text.slice(0,50)}..." (final: ${data.is_final})`, 'success');
+        if (data.is_final) {
+          if (text.trim()) { addTranscriptLine(text.trim()); clearInterim(); }
+        } else {
+          showInterim(text);
+        }
+      } else if (data.type === 'Metadata') {
+        debugLog(`✓ Deepgram metadata received (session active)`, 'info');
+      } else if (data.type === 'SpeechStarted') {
+        debugLog(`✓ Speech detected!`, 'success');
+      } else {
+        debugLog(`ℹ Deepgram message type: ${data.type}`, 'info');
+      }
+    } catch(e) {
+      debugLog(`✗ Message parse error: ${e.message}`, 'error');
+    }
+  };
+
+  socket.onerror = (e) => {
+    debugLog(`✗ WebSocket error — likely invalid Deepgram API key`, 'error');
+    showError('Deepgram connection failed. Check your API key and try again.');
+    stopRecording();
+  };
+
+  socket.onclose = (e) => {
+    debugLog(`WebSocket closed (code: ${e.code}, reason: "${e.reason || 'none'}")`, e.code === 1000 ? 'info' : 'warn');
+    if (isRecording) stopRecording();
+  };
+
+  isRecording = true;
+  document.getElementById('record-btn').classList.add('stop');
+  document.getElementById('record-icon').textContent = '⏹';
+  document.getElementById('record-label').textContent = 'Stop Recording';
+  document.getElementById('status-pill').className = 'status-pill recording';
+  document.getElementById('status-pill').innerHTML = '<div class="pulse"></div> Recording';
+  document.getElementById('summary-btn').disabled = false;
+
+  // Session timer
+  sessionSeconds = 0;
+  sessionInterval = setInterval(() => {
+    sessionSeconds++;
+    const m = String(Math.floor(sessionSeconds / 60)).padStart(2, '0');
+    const s = String(sessionSeconds % 60).padStart(2, '0');
+    document.getElementById('session-timer').textContent = `${m}:${s}`;
+  }, 1000);
+
+  // Analysis countdown
+  startAnalysisCountdown();
+}
+
+function stopRecording() {
+  isRecording = false;
+  if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+  if (mediaStream) mediaStream.getTracks().forEach(t => t.stop());
+  if (socket && socket.readyState === WebSocket.OPEN) socket.close();
+  clearInterval(sessionInterval);
+  clearInterval(countdownInterval);
+  clearTimeout(analysisTimer);
+
+  document.getElementById('record-btn').classList.remove('stop');
+  document.getElementById('record-icon').textContent = '⏺';
+  document.getElementById('record-label').textContent = 'Start Recording';
+  document.getElementById('status-pill').className = 'status-pill';
+  document.getElementById('status-pill').textContent = '● Idle';
+  document.getElementById('timer-label').textContent = 'Recording stopped';
+  document.getElementById('timer-fill').style.width = '0%';
+}
+
+// ── Transcript ──
+function addTranscriptLine(text) {
+  // Remove empty state
+  document.getElementById('transcript-empty').style.display = 'none';
+
+  const line = { text, time: new Date() };
+  transcriptLines.push(line);
+
+  const body = document.getElementById('transcript-body');
+  const div = document.createElement('div');
+  div.className = 'transcript-line';
+
+  // Alternate speaker detection (simple heuristic — every other block)
+  const isEven = transcriptLines.length % 2 === 0;
+  const speaker = isEven ? participantName : 'You';
+  const speakerClass = isEven ? 'participant' : 'you';
+
+  div.innerHTML = `
+    <span class="speaker-tag ${speakerClass}">${speaker}</span>
+    <span class="transcript-text">${escapeHtml(text)}</span>
+  `;
+  body.appendChild(div);
+  body.scrollTop = body.scrollHeight;
+
+  // Update word count
+  const totalWords = transcriptLines.reduce((n, l) => n + l.text.split(' ').length, 0);
+  document.getElementById('word-count').textContent = `· ${totalWords} words`;
+}
+
+function showInterim(text) {
+  let el = document.getElementById('interim-line');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'interim-line';
+    el.className = 'transcript-interim';
+    document.getElementById('transcript-body').appendChild(el);
+  }
+  el.textContent = text + '…';
+  document.getElementById('transcript-body').scrollTop = document.getElementById('transcript-body').scrollHeight;
+}
+
+function clearInterim() {
+  const el = document.getElementById('interim-line');
+  if (el) el.remove();
+}
+
+// ── Analysis countdown ──
+function startAnalysisCountdown() {
+  analysisCountdown = 20;
+  updateTimerUI();
+
+  countdownInterval = setInterval(() => {
+    analysisCountdown--;
+    updateTimerUI();
+    if (analysisCountdown <= 0) {
+      runAnalysis();
+      analysisCountdown = 20;
+    }
+  }, 1000);
+}
+
+function updateTimerUI() {
+  const pct = ((20 - analysisCountdown) / 20) * 100;
+  document.getElementById('timer-fill').style.width = pct + '%';
+  document.getElementById('timer-label').textContent = `Next analysis in ${analysisCountdown}s`;
+  document.getElementById('next-analysis').textContent = `Analysis in ${analysisCountdown}s`;
+}
+
+// ── Claude Analysis ──
+async function runAnalysis() {
+  if (transcriptLines.length === 0) return;
+
+  const recentLines = transcriptLines.slice(-20);
+  const recentTranscript = recentLines.map(l => l.text).join('\n');
+  const fullTranscript = transcriptLines.map(l => l.text).join('\n');
+
+  const prompt = `You are a real-time coaching assistant for a UX researcher conducting a user interview.
+
+DISCUSSION GUIDE (topics the researcher planned to cover):
+${discussionGuide}
+
+FULL TRANSCRIPT SO FAR:
+${fullTranscript}
+
+MOST RECENT EXCHANGE (last ~3 minutes):
+${recentTranscript}
+
+Your job is to help the researcher right now. Analyze the recent exchange and return a JSON object with these fields:
+
+{
+  "insights": [
+    {
+      "type": "probe" | "missed" | "sentiment",
+      "text": "specific, actionable coaching nudge (1-2 sentences max)"
+    }
+  ],
+  "coveredTopicIndices": [array of 0-based indices from the discussion guide that have been covered so far]
+}
+
+Rules:
+- Return 1-3 insights MAX. Only flag things genuinely worth interrupting the researcher's flow.
+- "probe": a specific follow-up question suggested by what the participant just said
+- "missed": a topic from the guide that hasn't come up yet and should be asked soon (only flag if >10 min might have passed or it's clearly missing)
+- "sentiment": emotional cues, hesitation, or contradictions worth noting
+- Be specific and concrete — reference exactly what was said
+- Don't repeat insights that are obvious or already covered
+- coveredTopicIndices: which topics from the guide have been addressed (even partially)
+- Return ONLY valid JSON, no other text`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    if (data.error) { showError(data.error.message); return; }
+
+    const raw = data.content?.[0]?.text || '';
+    const clean = raw.replace(/```json|```/g, '').trim();
+    const parsed = JSON.parse(clean);
+
+    // Update covered topics
+    if (parsed.coveredTopicIndices) {
+      parsed.coveredTopicIndices.forEach(i => coveredTopics.add(i));
+      renderTopics();
+    }
+
+    // Render insights
+    if (parsed.insights && parsed.insights.length > 0) {
+      const body = document.getElementById('insights-body');
+      // Clear empty state on first insight
+      body.querySelector('.insights-empty')?.remove();
+
+      parsed.insights.forEach(insight => {
+        const card = document.createElement('div');
+        card.className = `insight-card ${insight.type}`;
+        const icons = { probe: '💡', missed: '🔴', sentiment: '💬' };
+        const labels = { probe: 'Follow-up Probe', missed: 'Missed Topic', sentiment: 'Sentiment Flag' };
+        card.innerHTML = `
+          <div class="insight-type">${icons[insight.type]} ${labels[insight.type]}</div>
+          <div class="insight-text">${escapeHtml(insight.text)}</div>
+          <div class="insight-time">${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+        `;
+        body.insertBefore(card, body.firstChild);
+        body.scrollTop = 0;
+      });
+    }
+
+  } catch(e) {
+    // Silently fail during analysis — don't interrupt the researcher
+    console.error('Analysis error:', e);
+  }
+}
+
+// ── Post-Interview Summary ──
+async function generateSummary() {
+  if (transcriptLines.length === 0) {
+    alert('No transcript yet — start recording first.');
+    return;
+  }
+
+  document.getElementById('summary-modal').classList.add('open');
+  document.getElementById('summary-body').innerHTML = `
+    <div class="modal-loading"><div class="spinner"></div> Generating insights…</div>
+  `;
+  summaryText = '';
+
+  const fullTranscript = transcriptLines.map((l, i) => {
+    const speaker = i % 2 === 0 ? 'You' : participantName;
+    return `${speaker}: ${l.text}`;
+  }).join('\n');
+
+  const prompt = `You are a senior UX researcher analyzing an interview transcript. Generate a comprehensive post-interview summary.
+
+DISCUSSION GUIDE:
+${discussionGuide}
+
+FULL TRANSCRIPT:
+${fullTranscript}
+
+Generate a structured summary with these sections:
+
+**Key Themes**
+[3-5 main themes that emerged, with brief explanation]
+
+**Notable Quotes**
+[3-5 direct quotes from the participant that were particularly insightful]
+
+**Pain Points Identified**
+[Specific frustrations or problems the participant mentioned]
+
+**Unmet Needs**
+[Things the participant needs but isn't getting]
+
+**Topics Covered vs Missed**
+[Which guide topics were addressed, which were skipped]
+
+**Recommended Follow-up Questions**
+[3-5 questions you'd want to ask in a follow-up session]
+
+**Overall Impression**
+[1 paragraph synthesis of the most important takeaways]
+
+Be specific and reference actual things said in the interview. Focus on insights that would be actionable for a product team.`;
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+    summaryText = data.content?.[0]?.text || 'Could not generate summary.';
+    document.getElementById('summary-body').textContent = summaryText;
+
+  } catch(e) {
+    document.getElementById('summary-body').textContent = 'Error generating summary. Please try again.';
+  }
+}
+
+function closeModal() {
+  document.getElementById('summary-modal').classList.remove('open');
+}
+
+async function copySummary() {
+  if (summaryText) {
+    await navigator.clipboard.writeText(summaryText);
+    const btn = document.querySelector('.btn-copy');
+    btn.textContent = 'Copied!';
+    setTimeout(() => btn.textContent = 'Copy to Clipboard', 2000);
+  }
+}
+
+// ── Helpers ──
+function showError(msg) {
+  const existing = document.querySelector('.error-banner');
+  if (existing) existing.remove();
+  const banner = document.createElement('div');
+  banner.className = 'error-banner';
+  banner.textContent = '⚠ ' + msg;
+  document.getElementById('insights-body').prepend(banner);
+  setTimeout(() => banner.remove(), 6000);
+}
+
+function escapeHtml(text) {
+  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Close modal on overlay click
+document.getElementById('summary-modal').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+</script>
+</body>
+</html>
